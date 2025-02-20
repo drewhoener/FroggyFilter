@@ -1,0 +1,13 @@
+{
+  "Name": "FroggyFilter",
+  "Author": "Abs0rbed",
+  "Version": "1.0.0",
+  "Description": "Adds a filtered list for what monsters the funny frog is allowed to eat",
+  "UniqueID": "Abs0rbed.FroggyFilter",
+  "EntryDll": "FroggyFilter.dll",
+  "MinimumApiVersion": "4.0.5",
+  "UpdateKeys": [
+    "GitHub:Abs0rbed/FroggyFilter",
+    "Nexus:31789"
+  ]
+}

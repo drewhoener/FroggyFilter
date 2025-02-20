@@ -1,0 +1,6 @@
+{
+  "gmcm.title.monsters": "Allowed Monsters",
+  "gmcm.page.advanced": "Advanced Settings",
+  "gmcm.item.monsters_excluded": "Excluded Monsters",
+  "gmcm.item.monsters_excluded.tooltip": "List of monsters that should not be included in the GMCM option list, separated by '/'"
+}
