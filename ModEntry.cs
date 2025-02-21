@@ -11,7 +11,11 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Companions;
+using StardewValley.Extensions;
+using StardewValley.GameData;
+using StardewValley.Locations;
 using StardewValley.Monsters;
+using StardewValley.TokenizableStrings;
 
 namespace FroggyFilter;
 
@@ -31,6 +35,7 @@ internal sealed class ModEntry : Mod
 
     private readonly Dictionary<string, string> _localizedMonsterNames = new();
     private readonly HashSet<string> _forceExcludedNames = ["Truffle Crab"];
+    private readonly HashSet<string> _activeSlayerQuests = [];
 
     public override void Entry(IModHelper helper)
     {
@@ -41,6 +46,7 @@ internal sealed class ModEntry : Mod
         _modConfig = helper.ReadConfig<ModConfig>();
 
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+        helper.Events.GameLoop.TimeChanged += OnTenMinuteUpdate;
         helper.Events.Content.AssetsInvalidated += OnAssetsInvalidated;
 
         Patch();
@@ -88,6 +94,19 @@ internal sealed class ModEntry : Mod
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
     {
         Helper.Events.GameLoop.UpdateTicked += HandleContentLoadedTicks;
+    }
+
+    private void OnTenMinuteUpdate(object? sender, TimeChangedEventArgs e)
+    {
+        _activeSlayerQuests.Clear();
+        foreach (var monsterSlayerQuestData in DataLoader.MonsterSlayerQuests(Game1.content).Values)
+        {
+            if (monsterSlayerQuestData.Targets == null)
+            {
+                continue;
+            }
+            _activeSlayerQuests.AddRange(monsterSlayerQuestData.Targets);
+        }
     }
 
     private void OnAssetsInvalidated(object? sender, AssetsInvalidatedEventArgs e)
@@ -181,6 +200,15 @@ internal sealed class ModEntry : Mod
         );
 
         // Set up GMCM
+        api.AddSectionTitle(ModManifest, () => I18n.Gmcm_Title_General());
+
+        api.AddBoolOption(ModManifest,
+            getValue: () => _modConfig.ExcludeEradicationGoals,
+            setValue: value => _modConfig.ExcludeEradicationGoals = value,
+            name: () => I18n.Gmcm_Item_ExcludeEradicationGoals(),
+            tooltip: () => I18n.Gmcm_Item_ExcludeEradicationGoals_Tooltip()
+        );
+
         api.AddSectionTitle(ModManifest, () => I18n.Gmcm_Title_Monsters());
 
         var sortedMonsters = _localizedMonsterNames.OrderBy(x => x.Key);
@@ -219,6 +247,12 @@ internal sealed class ModEntry : Mod
         {
             if (character is not Monster monster)
                 continue;
+
+            if (_instance._activeSlayerQuests.Contains(monster.Name) && _instance._modConfig.ExcludeEradicationGoals)
+            {
+                _instance.Monitor.Log($"Cannot eat {monster.Name}, still have slayer task.");
+                continue;
+            }
 
             if (_instance._modConfig.EnabledMonsters.TryGetValue(monster.Name, out var isMonsterEnabled) &&
                 !isMonsterEnabled)

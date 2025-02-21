@@ -1,6 +1,9 @@
 {
+  "gmcm.title.general": "General Options",
   "gmcm.title.monsters": "Allowed Monsters",
   "gmcm.page.advanced": "Advanced Settings",
+  "gmcm.item.exclude_eradication_goals": "Preserve Eradication Goals",
+  "gmcm.item.exclude_eradication_goals.tooltip": "Prevent the frog from eating monsters that have an unmet eradication goal",
   "gmcm.item.monsters_excluded": "Excluded Monsters",
   "gmcm.item.monsters_excluded.tooltip": "List of monsters that should not be included in the GMCM option list, separated by '/'"
 }
